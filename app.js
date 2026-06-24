@@ -513,48 +513,80 @@
     resizeTimer = setTimeout(function () { if (mode === "free") scatterFree(balloons); }, 120);
   }, { passive: true });
 
-  /* ===== Background music — soft instrumental via the YouTube IFrame API ===== */
-  var YT_ID = "TorMYUdoV5k";
+  /* ===== Background music — soft "Happy Birthday" music box (Web Audio API) =====
+     No external files or YouTube (that song blocked embedding). The melody is public
+     domain; synthesized locally so it works on every device, including iPhone. */
   var MUSIC_KEY = "hawraa-music";
-  var MUSIC_VOL = 65; // 0-100 background music volume
-  var ytPlayer = null, ytReady = false, ytWantPlay = false;
+  var MUSIC_VOL = 0.4; // 0–1 master volume
   var musicBtn = document.getElementById("music-toggle");
+  var audioCtx = null, masterGain = null, musicOn = false, melodyTimer = null;
+
+  // [frequencyHz, durationSeconds] — Happy Birthday melody (4 phrases)
+  var NOTES = [
+    [392.00, 0.32], [392.00, 0.28], [440.00, 0.6], [392.00, 0.6], [523.25, 0.6], [493.88, 1.05],
+    [392.00, 0.32], [392.00, 0.28], [440.00, 0.6], [392.00, 0.6], [587.33, 0.6], [523.25, 1.05],
+    [392.00, 0.32], [392.00, 0.28], [783.99, 0.6], [659.25, 0.6], [523.25, 0.6], [493.88, 0.6], [440.00, 1.2],
+    [698.46, 0.32], [698.46, 0.28], [659.25, 0.6], [523.25, 0.6], [587.33, 0.6], [523.25, 1.4]
+  ];
 
   function musicPressed(on) { if (musicBtn) musicBtn.setAttribute("aria-pressed", on ? "true" : "false"); }
-  function musicIsPlaying() { try { return !!ytPlayer && ytReady && ytPlayer.getPlayerState() === 1; } catch (e) { return false; } }
+
+  function ensureAudio() {
+    if (audioCtx) return true;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    try {
+      audioCtx = new AC();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = MUSIC_VOL;
+      masterGain.connect(audioCtx.destination);
+    } catch (e) { return false; }
+    return true;
+  }
+
+  function scheduleMelody(start) {
+    var t = start;
+    for (var i = 0; i < NOTES.length; i++) {
+      var f = NOTES[i][0], dur = NOTES[i][1];
+      var osc = audioCtx.createOscillator();
+      var g = audioCtx.createGain();
+      osc.type = "triangle";
+      osc.frequency.value = f;
+      osc.connect(g); g.connect(masterGain);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.9, t + 0.03);     // soft attack
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur * 0.95); // music-box decay
+      osc.start(t);
+      osc.stop(t + dur);
+      t += dur;
+    }
+    return t;
+  }
+
+  function loopMelody() {
+    if (!musicOn || !audioCtx) return;
+    var end = scheduleMelody(audioCtx.currentTime + 0.08);
+    var ms = (end - audioCtx.currentTime + 1.6) * 1000; // gap before repeating
+    melodyTimer = setTimeout(loopMelody, ms);
+  }
+
   function musicPlay() {
-    if (ytReady && ytPlayer) { try { ytPlayer.setVolume(MUSIC_VOL); ytPlayer.playVideo(); } catch (e) {} }
-    else { ytWantPlay = true; }
+    if (!ensureAudio()) return;
+    if (audioCtx.state === "suspended") { try { audioCtx.resume(); } catch (e) {} }
+    try { masterGain.gain.value = MUSIC_VOL; } catch (e) {}
+    if (!musicOn) { musicOn = true; loopMelody(); }
     musicPressed(true);
     safeStorage(function () { localStorage.setItem(MUSIC_KEY, "on"); });
   }
   function musicStop() {
-    ytWantPlay = false;
-    if (ytReady && ytPlayer) { try { ytPlayer.pauseVideo(); } catch (e) {} }
+    musicOn = false;
+    clearTimeout(melodyTimer);
+    if (masterGain) { try { masterGain.gain.value = 0; } catch (e) {} }
     musicPressed(false);
     safeStorage(function () { localStorage.setItem(MUSIC_KEY, "off"); });
   }
-  function musicPauseForVoice() { if (musicIsPlaying()) { musicPausedForVoice = true; try { ytPlayer.pauseVideo(); } catch (e) {} } }
-  function musicResumeAfterVoice() { if (musicPausedForVoice) { musicPausedForVoice = false; try { if (ytPlayer) ytPlayer.playVideo(); } catch (e) {} } }
-
-  // Called by the YouTube IFrame API once it has loaded (script tag in index.html).
-  window.onYouTubeIframeAPIReady = function () {
-    try {
-      ytPlayer = new YT.Player("yt-bg", {
-        videoId: YT_ID,
-        playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, loop: 1, playlist: YT_ID, playsinline: 1, rel: 0, modestbranding: 1 },
-        events: {
-          onReady: function (e) {
-            ytReady = true;
-            try { e.target.setVolume(MUSIC_VOL); } catch (_) {}
-            if (ytWantPlay) { try { e.target.playVideo(); } catch (_) {} }
-          },
-          // loop backup: if it ever ends, start again
-          onStateChange: function (e) { if (e.data === 0) { try { e.target.playVideo(); } catch (_) {} } }
-        }
-      });
-    } catch (e) {}
-  };
+  function musicPauseForVoice() { if (musicOn && masterGain) { musicPausedForVoice = true; try { masterGain.gain.value = 0; } catch (e) {} } }
+  function musicResumeAfterVoice() { if (musicPausedForVoice) { musicPausedForVoice = false; if (musicOn && masterGain) { try { masterGain.gain.value = MUSIC_VOL; } catch (e) {} } } }
 
   if (musicBtn) {
     musicBtn.addEventListener("click", function () {
@@ -563,8 +595,7 @@
     });
   }
 
-  // Best-effort: start the song softly on her first interaction (unless she opted out before).
-  // Browsers block autoplay *with sound*, so this needs a real gesture to begin.
+  // Start on her first interaction (Web Audio needs a user gesture), unless she opted out.
   (function () {
     function maybeStart(e) {
       if (e && e.target && e.target.closest && e.target.closest("#music-toggle")) return; // let the toggle handle itself

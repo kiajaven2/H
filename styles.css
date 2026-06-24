@@ -498,19 +498,6 @@ body {
 .music-toggle[aria-pressed="true"] .music-icon { animation: spin 4s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* hidden YouTube background-music player (kept rendered 1px off-screen so it can play) */
-.yt-bg {
-  position: fixed;
-  inline-size: 1px;
-  block-size: 1px;
-  inset-block-start: -10px;
-  inset-inline-start: -10px;
-  opacity: 0;
-  pointer-events: none;
-  border: 0;
-  z-index: -1;
-}
-
 /* ----------------------------- Side controls (stage 3) ------------------ */
 .side-controls {
   position: fixed;
