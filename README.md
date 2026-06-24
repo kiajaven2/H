@@ -108,10 +108,15 @@ app.js             stage flow + quiz + memes + balloons + voice playback
 confetti.js        self-contained confetti (no external library)
 data/quiz.js       ← stage 1 question(s)
 data/memes.js      ← stage 2 meme list
-data/messages.js   ← stage 3 balloon messages + the golden voice balloon
+data/messages.js   ← stage 3 balloon messages (text / image / voice) + closing note (window.FINALE)
 memes/             ← your meme images
-assets/            hamster favicon + (optional) audio: voice-note.mp3, birthday.mp3
+assets/images/     ← picture-message images
+assets/audio/      ← voice-message audio files
 ```
+
+Background music is a soft instrumental streamed from a hidden **YouTube** player (the 🎵 button,
+low volume). Browsers block autoplay with sound, so it starts on the first tap; works best on
+Android/desktop (iPhone/Safari hidden playback is unreliable). Change the song via `YT_ID` in app.js.
 
 ## 📋 Credits & licensing
 - Fonts: **Baloo Bhaijaan 2**, **Tajawal**, **Cairo** — Google Fonts (Open Font License).

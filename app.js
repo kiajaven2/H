@@ -20,7 +20,6 @@
   var audioSlot = document.getElementById("dlg-audio");
   var imageSlot = document.getElementById("dlg-image");
   var closeBtn = document.getElementById("dialog-close");
-  var bgMusic = document.getElementById("bg-music");
 
   // --- stage-3 elements ---
   var air = document.getElementById("balloon-air");
@@ -455,7 +454,7 @@
       });
       audioSlot.appendChild(audio);
 
-      if (bgMusic && !bgMusic.paused) { musicPausedForVoice = true; bgMusic.pause(); }
+      musicPauseForVoice(); // duck the background song while the voice note plays
       var pp = audio.play();
       if (pp && typeof pp.catch === "function") pp.catch(function () {});
     }
@@ -471,11 +470,7 @@
     if (a) { try { a.pause(); } catch (e) {} }
     audioSlot.replaceChildren();
 
-    if (musicPausedForVoice && bgMusic) {
-      musicPausedForVoice = false;
-      var p = bgMusic.play();
-      if (p && typeof p.catch === "function") p.catch(function () {});
-    }
+    musicResumeAfterVoice(); // bring the background song back after the voice note
 
     var btn = lastBalloon;
     lastBalloon = null;
@@ -518,26 +513,68 @@
     resizeTimer = setTimeout(function () { if (mode === "free") scatterFree(balloons); }, 120);
   }, { passive: true });
 
-  /* ========================= Music toggle ================================ */
-  (function setupMusic() {
-    var btn = document.getElementById("music-toggle");
-    if (!btn || !bgMusic) return;
-    var KEY = "hawraa-music";
-    function setPressed(on) { btn.setAttribute("aria-pressed", on ? "true" : "false"); }
-    btn.addEventListener("click", function () {
-      var turnOn = btn.getAttribute("aria-pressed") !== "true";
-      if (turnOn) {
-        var p = bgMusic.play();
-        if (p && typeof p.then === "function") {
-          p.then(function () { setPressed(true); safeStorage(function () { localStorage.setItem(KEY, "on"); }); })
-           .catch(function () { setPressed(false); });
-        } else { setPressed(true); }
-      } else {
-        bgMusic.pause();
-        setPressed(false);
-        safeStorage(function () { localStorage.setItem(KEY, "off"); });
-      }
+  /* ===== Background music — soft instrumental via the YouTube IFrame API ===== */
+  var YT_ID = "TorMYUdoV5k";
+  var MUSIC_KEY = "hawraa-music";
+  var MUSIC_VOL = 14; // 0-100, kept low for a soft background
+  var ytPlayer = null, ytReady = false, ytWantPlay = false;
+  var musicBtn = document.getElementById("music-toggle");
+
+  function musicPressed(on) { if (musicBtn) musicBtn.setAttribute("aria-pressed", on ? "true" : "false"); }
+  function musicIsPlaying() { try { return !!ytPlayer && ytReady && ytPlayer.getPlayerState() === 1; } catch (e) { return false; } }
+  function musicPlay() {
+    if (ytReady && ytPlayer) { try { ytPlayer.setVolume(MUSIC_VOL); ytPlayer.playVideo(); } catch (e) {} }
+    else { ytWantPlay = true; }
+    musicPressed(true);
+    safeStorage(function () { localStorage.setItem(MUSIC_KEY, "on"); });
+  }
+  function musicStop() {
+    ytWantPlay = false;
+    if (ytReady && ytPlayer) { try { ytPlayer.pauseVideo(); } catch (e) {} }
+    musicPressed(false);
+    safeStorage(function () { localStorage.setItem(MUSIC_KEY, "off"); });
+  }
+  function musicPauseForVoice() { if (musicIsPlaying()) { musicPausedForVoice = true; try { ytPlayer.pauseVideo(); } catch (e) {} } }
+  function musicResumeAfterVoice() { if (musicPausedForVoice) { musicPausedForVoice = false; try { if (ytPlayer) ytPlayer.playVideo(); } catch (e) {} } }
+
+  // Called by the YouTube IFrame API once it has loaded (script tag in index.html).
+  window.onYouTubeIframeAPIReady = function () {
+    try {
+      ytPlayer = new YT.Player("yt-bg", {
+        videoId: YT_ID,
+        playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, loop: 1, playlist: YT_ID, playsinline: 1, rel: 0, modestbranding: 1 },
+        events: {
+          onReady: function (e) {
+            ytReady = true;
+            try { e.target.setVolume(MUSIC_VOL); } catch (_) {}
+            if (ytWantPlay) { try { e.target.playVideo(); } catch (_) {} }
+          },
+          // loop backup: if it ever ends, start again
+          onStateChange: function (e) { if (e.data === 0) { try { e.target.playVideo(); } catch (_) {} } }
+        }
+      });
+    } catch (e) {}
+  };
+
+  if (musicBtn) {
+    musicBtn.addEventListener("click", function () {
+      if (musicBtn.getAttribute("aria-pressed") === "true") musicStop();
+      else musicPlay();
     });
+  }
+
+  // Best-effort: start the song softly on her first interaction (unless she opted out before).
+  // Browsers block autoplay *with sound*, so this needs a real gesture to begin.
+  (function () {
+    function maybeStart(e) {
+      if (e && e.target && e.target.closest && e.target.closest("#music-toggle")) return; // let the toggle handle itself
+      document.removeEventListener("pointerdown", maybeStart, true);
+      document.removeEventListener("keydown", maybeStart, true);
+      if (safeStorage(function () { return localStorage.getItem(MUSIC_KEY); }) === "off") return;
+      musicPlay();
+    }
+    document.addEventListener("pointerdown", maybeStart, true);
+    document.addEventListener("keydown", maybeStart, true);
   })();
 
   /* ========================= Init ======================================== */
