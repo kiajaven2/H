@@ -114,10 +114,10 @@ assets/images/     ← picture-message images
 assets/audio/      ← voice-message audio files
 ```
 
-Background music is a soft **"Happy Birthday" melody synthesized in the browser** (Web Audio API) —
-no files, no YouTube (the melody is public domain). The 🎵 button toggles it; it starts on the first
-tap (browsers require a gesture before playing sound) and works on **all devices, including iPhone**.
-It quiets during voice notes, then resumes. Adjust loudness via `MUSIC_VOL` in app.js.
+Background music is a short, self-hosted soft-instrumental loop (`assets/audio/bg-music.mp3`) played
+at **low volume**. The 🎵 button toggles it; it starts on the first tap (browsers require a gesture
+before playing sound) and works on **all devices, including iPhone**. It quiets during voice notes,
+then resumes. Adjust loudness via `MUSIC_VOL` in app.js, or replace the mp3 to change the song.
 
 ## 📋 Credits & licensing
 - Fonts: **Baloo Bhaijaan 2**, **Tajawal**, **Cairo** — Google Fonts (Open Font License).
