@@ -205,41 +205,48 @@
   }
 
   /* ========================= Stage 2: memes =============================== */
+  // Stage 2 shows the memes ONE BY ONE (next/prev), then continues to the balloons.
   function buildMemes() {
-    var grid = document.getElementById("memes-grid");
+    var frame = document.getElementById("meme-frame");
+    var img = document.getElementById("meme-img");
+    var cap = document.getElementById("meme-cap");
+    var count = document.getElementById("meme-count");
     var nextBtn = document.getElementById("memes-next");
-    if (!grid) return;
-    var data = Array.isArray(window.MEMES) ? window.MEMES : [];
+    var prevBtn = document.getElementById("memes-prev");
+    if (!nextBtn) return;
 
-    data.forEach(function (m) {
-      if (!m || !m.src) return;
-      var fig = document.createElement("figure");
-      fig.className = "meme";
+    var data = Array.isArray(window.MEMES) ? window.MEMES.filter(function (m) { return m && m.src; }) : [];
 
-      var img = document.createElement("img");
+    if (!data.length) { // no memes -> just a continue button
+      if (frame) frame.hidden = true;
+      if (count) count.hidden = true;
+      if (prevBtn) prevBtn.hidden = true;
+      nextBtn.textContent = "يلا نكمل المفاجأة ➜";
+      nextBtn.addEventListener("click", function () { showStage(3); });
+      return;
+    }
+
+    var idx = 0;
+    function render() {
+      var m = data[idx];
       img.src = m.src;
-      img.alt = m.caption ? m.caption : "ميم";
-      img.loading = "lazy";
-      img.addEventListener("error", function () {
-        img.remove();
-        var note = document.createElement("div");
-        note.className = "meme-missing";
-        note.style.cssText = "padding:1.4em;color:var(--ink-soft);font-size:.95rem;";
-        note.textContent = "تعذّر تحميل: " + m.src;
-        fig.insertBefore(note, fig.firstChild);
-      });
-      fig.appendChild(img);
+      img.alt = m.caption || "ميم";
+      cap.textContent = m.caption || "";
+      count.textContent = (idx + 1) + " / " + data.length;
+      nextBtn.textContent = (idx === data.length - 1) ? "يلا نكمل المفاجأة ➜" : "التالي ➜";
+      if (prevBtn) prevBtn.hidden = (idx === 0);
+      // re-trigger the fade-in animation
+      frame.classList.remove("is-changing"); void frame.offsetWidth; frame.classList.add("is-changing");
+    }
+    img.addEventListener("error", function () { cap.textContent = "تعذّر تحميل الصورة 📷"; });
+    function next() { if (idx < data.length - 1) { idx++; render(); } else { showStage(3); } }
+    function prev() { if (idx > 0) { idx--; render(); } }
 
-      if (m.caption) {
-        var cap = document.createElement("figcaption");
-        cap.dir = "auto";
-        cap.textContent = m.caption;
-        fig.appendChild(cap);
-      }
-      grid.appendChild(fig);
-    });
+    nextBtn.addEventListener("click", next);
+    if (prevBtn) prevBtn.addEventListener("click", prev);
+    img.addEventListener("click", next); // tap the meme to advance
 
-    if (nextBtn) nextBtn.addEventListener("click", function () { showStage(3); });
+    render();
   }
 
   /* ========================= Stage 3: balloon finale ====================== */

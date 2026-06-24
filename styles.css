@@ -215,33 +215,30 @@ body {
 }
 
 /* ----------------------------- Memes (stage 2) -------------------------- */
-.memes-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
-  gap: 1rem;
-  margin: 0.5rem 0 2rem;
-}
-.meme {
-  margin: 0;
+.meme-frame {
+  margin: 1rem auto 0.6rem;
+  max-inline-size: min(92%, 460px);
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 18px;
   overflow: hidden;
   box-shadow: var(--shadow-soft);
 }
-.meme img {
+.meme-frame.is-changing { animation: meme-in 0.35s ease; }
+@keyframes meme-in { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: none; } }
+.meme-img {
   display: block;
   inline-size: 100%;
   block-size: auto;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
+  max-block-size: 56vh;
+  object-fit: contain;
   background: var(--panel);
+  cursor: pointer;
 }
-.meme figcaption {
-  padding: 0.7em 0.9em;
-  font-size: 0.98rem;
-  color: var(--ink-soft);
-}
+.meme-cap { padding: 0.6em 0.9em; font-size: 0.98rem; color: var(--ink-soft); }
+.meme-cap:empty { display: none; }
+.meme-count { color: var(--ink-soft); font-weight: 700; margin: 0.2em 0 1.1rem; }
+.meme-nav { display: flex; gap: 0.8rem; justify-content: center; align-items: center; flex-wrap: wrap; }
 
 /* ----------------------------- Buttons ---------------------------------- */
 .cta-btn {

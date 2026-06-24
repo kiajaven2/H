@@ -22,7 +22,7 @@
    ============================================================================ */
 
 window.MEMES = [
-  { src: "memes/placeholder-1.svg", caption: "ضعي الميم الأول هنا 😹" },
-  { src: "memes/placeholder-2.svg", caption: "والميم الثاني هنا 😂" },
-  { src: "memes/placeholder-3.svg", caption: "كل ما زاد… زاد الضحك 🎉" },
+  { src: "memes/meme1.jpg" },
+  { src: "memes/meme2.jpg" },
+  { src: "memes/meme3.jpg" },
 ];
