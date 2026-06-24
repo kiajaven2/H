@@ -19,6 +19,9 @@
   var messageEl = document.getElementById("dlg-message");
   var audioSlot = document.getElementById("dlg-audio");
   var imageSlot = document.getElementById("dlg-image");
+  var videoSlot = document.getElementById("dlg-video");
+  var badgeEl = document.getElementById("dlg-badge");
+  var dialogCard = dialog.querySelector(".dialog-card");
   var closeBtn = document.getElementById("dialog-close");
 
   // --- stage-3 elements ---
@@ -253,7 +256,7 @@
   function prepareMessages() {
     var data = Array.isArray(window.MESSAGES) ? window.MESSAGES : [];
     allMessages = data.filter(function (m) {
-      return m && m.approved !== false && (m.name || m.message || m.voice || m.image);
+      return m && m.approved !== false && (m.name || m.message || m.voice || m.image || m.video);
     }).map(function (m, i) {
       return {
         name: clampStr(m.name || "صديق", MAX_NAME),
@@ -261,6 +264,8 @@
         lang: m.lang === "en" ? "en" : "ar",
         voice: m.voice || null,
         image: m.image || null,
+        video: m.video || null,
+        special: (m.special === "best" || m.special === "vip") ? m.special : null,
         hue: (COLOR_HUES[m.color] != null) ? COLOR_HUES[m.color] : PALETTE[i % PALETTE.length]
       };
     });
@@ -270,7 +275,7 @@
   function makeBalloonEl(msg) {
     var btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "balloon";
+    btn.className = "balloon" + (msg.special === "best" ? " balloon--best" : msg.special === "vip" ? " balloon--vip" : "");
     btn.style.setProperty("--hue", msg.hue);
     btn.setAttribute("aria-label", "رسالة من " + msg.name);
     btn.dataset.name = msg.name;
@@ -278,7 +283,16 @@
     btn.dataset.lang = msg.lang;
     if (msg.voice) btn.dataset.voice = msg.voice;
     if (msg.image) btn.dataset.image = msg.image;
+    if (msg.video) btn.dataset.video = msg.video;
+    if (msg.special) btn.dataset.special = msg.special;
 
+    if (msg.special) {
+      var badge = document.createElement("span");
+      badge.className = "balloon-badge";
+      badge.setAttribute("aria-hidden", "true");
+      badge.textContent = msg.special === "best" ? "👑" : "💖";
+      btn.appendChild(badge);
+    }
     var label = document.createElement("span");
     label.className = "balloon-name";
     label.dir = "auto";
@@ -430,8 +444,34 @@
     messageEl.lang = lang;
     messageEl.dir = lang === "en" ? "ltr" : "rtl";
 
+    // special-sender accent (best friend / vip)
+    dialogCard.classList.remove("dialog--best", "dialog--vip");
+    badgeEl.textContent = "";
+    if (btn.dataset.special === "best") { dialogCard.classList.add("dialog--best"); badgeEl.textContent = "👑 أعز صديقة"; }
+    else if (btn.dataset.special === "vip") { dialogCard.classList.add("dialog--vip"); badgeEl.textContent = "💖 صديقة مميّزة"; }
+
     audioSlot.replaceChildren();
     imageSlot.replaceChildren();
+    videoSlot.replaceChildren();
+
+    if (btn.dataset.video) {
+      var vid = document.createElement("video");
+      vid.controls = true;
+      vid.playsInline = true;
+      vid.preload = "metadata";
+      vid.src = btn.dataset.video;
+      vid.addEventListener("error", function () {
+        videoSlot.replaceChildren();
+        var nv = document.createElement("p");
+        nv.className = "audio-missing";
+        nv.textContent = "تعذّر تحميل الفيديو 🎬";
+        videoSlot.appendChild(nv);
+      });
+      videoSlot.appendChild(vid);
+      musicPauseForVoice();
+      var pv = vid.play();
+      if (pv && typeof pv.catch === "function") pv.catch(function () {});
+    }
 
     if (btn.dataset.image) {
       var img = document.createElement("img");
@@ -475,7 +515,12 @@
   function handleClosed() {
     var a = audioSlot.querySelector("audio");
     if (a) { try { a.pause(); } catch (e) {} }
+    var v = videoSlot.querySelector("video");
+    if (v) { try { v.pause(); } catch (e) {} }
     audioSlot.replaceChildren();
+    videoSlot.replaceChildren();
+    dialogCard.classList.remove("dialog--best", "dialog--vip");
+    badgeEl.textContent = "";
 
     musicResumeAfterVoice(); // bring the background song back after the voice note
 
