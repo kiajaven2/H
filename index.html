@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>عيد ميلاد سعيد يا حوراء 🎈</title>
+  <meta name="description" content="مفاجأة عيد ميلاد لحوراء — سؤال، ميمز، ثم بالونات تحمل رسائل من الأصدقاء." />
+  <meta name="theme-color" content="#0d0b12" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+
+  <!-- Fonts: Baloo Bhaijaan 2 (Arabic display) + Tajawal/Cairo (Arabic body). Loads over https even on file:// -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400..800&family=Cairo:wght@500;700&family=Tajawal:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Twinkling gold starfield (filled by app.js) and confetti layer -->
+  <div id="starfield" class="starfield" aria-hidden="true"></div>
+  <canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+  <!-- Reusable hamster mascot defined once, used via <use> -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="hamster" viewBox="0 0 120 120">
+      <circle cx="34" cy="36" r="15" fill="#d9a86c" />
+      <circle cx="86" cy="36" r="15" fill="#d9a86c" />
+      <circle cx="34" cy="36" r="7" fill="#f2b8c6" />
+      <circle cx="86" cy="36" r="7" fill="#f2b8c6" />
+      <ellipse cx="60" cy="66" rx="42" ry="38" fill="#f3d09a" />
+      <ellipse cx="60" cy="76" rx="28" ry="22" fill="#fdf0d5" />
+      <circle cx="30" cy="74" r="12" fill="#fbe0e6" />
+      <circle cx="90" cy="74" r="12" fill="#fbe0e6" />
+      <circle cx="47" cy="62" r="5.5" fill="#3b2b20" />
+      <circle cx="73" cy="62" r="5.5" fill="#3b2b20" />
+      <circle cx="49" cy="60" r="1.8" fill="#fff" />
+      <circle cx="75" cy="60" r="1.8" fill="#fff" />
+      <ellipse cx="60" cy="72" rx="4.5" ry="3.2" fill="#e58fa0" />
+      <path d="M60 75 v3" stroke="#9c7a52" stroke-width="2" fill="none" stroke-linecap="round" />
+      <path d="M60 78 q-6 5 -11 0" stroke="#9c7a52" stroke-width="2" fill="none" stroke-linecap="round" />
+      <path d="M60 78 q6 5 11 0" stroke="#9c7a52" stroke-width="2" fill="none" stroke-linecap="round" />
+    </symbol>
+    <symbol id="present" viewBox="0 0 100 100">
+      <rect x="14" y="46" width="72" height="42" rx="4" fill="currentColor" />
+      <rect x="8" y="32" width="84" height="16" rx="3" fill="currentColor" opacity="0.82" />
+      <rect x="43" y="32" width="14" height="56" fill="#f6c453" />
+      <ellipse cx="40" cy="26" rx="10" ry="7" fill="#f6c453" />
+      <ellipse cx="60" cy="26" rx="10" ry="7" fill="#f6c453" />
+      <circle cx="50" cy="28" r="5" fill="#d39a2c" />
+    </symbol>
+  </svg>
+
+  <!-- Progress dots -->
+  <nav class="progress" aria-label="مراحل المفاجأة">
+    <button class="progress-dot is-active" type="button" data-stage="1" aria-label="المرحلة الأولى: سؤال"></button>
+    <button class="progress-dot" type="button" data-stage="2" aria-label="المرحلة الثانية: ميمز"></button>
+    <button class="progress-dot" type="button" data-stage="3" aria-label="المرحلة الثالثة: بالونات"></button>
+  </nav>
+
+  <main class="stages">
+    <!-- ============== STAGE 1: QUIZ ============== -->
+    <section id="stage-quiz" class="stage is-active" aria-labelledby="quiz-heading">
+      <div class="stage-inner">
+        <svg class="stage-hamster" viewBox="0 0 120 120" role="img" aria-label="هامستر لطيف">
+          <use href="#hamster" />
+        </svg>
+        <h1 id="quiz-heading" class="stage-title">قبل ما نبدأ… سؤال صغير 🎉</h1>
+        <div id="quiz-host" class="quiz"><!-- built by app.js from data/quiz.js --></div>
+      </div>
+    </section>
+
+    <!-- ============== STAGE 2: MEMES ============== -->
+    <section id="stage-memes" class="stage" aria-labelledby="memes-heading" hidden>
+      <div class="stage-inner">
+        <h1 id="memes-heading" class="stage-title">شوية ميمز عشانك يا حوراء 😹</h1>
+        <p class="stage-sub">لأنك تستاهلي الضحكة 💛</p>
+        <div id="memes-grid" class="memes-grid"><!-- built by app.js from data/memes.js --></div>
+        <button id="memes-next" class="cta-btn" type="button">يلا نكمل المفاجأة ➜</button>
+      </div>
+    </section>
+
+    <!-- ============== STAGE 3: BALLOONS ============== -->
+    <section id="stage-balloons" class="stage" aria-labelledby="balloons-heading" hidden>
+      <div class="finale-top">
+        <h1 id="balloons-heading" class="finale-prompt">اضغطي البالون 🎈</h1>
+        <p id="progress-count" class="progress-count" aria-live="polite"></p>
+      </div>
+
+      <div id="scene" class="scene">
+        <div id="balloon-air" class="balloon-air" aria-label="بالونات تحمل رسائل من الأصدقاء"></div>
+        <div class="ground" aria-hidden="true">
+          <span class="ground-balloon" style="--hue:330; --gx:7%"></span>
+          <span class="ground-balloon" style="--hue:200; --gx:90%"></span>
+          <div class="presents">
+            <svg class="present present--s" style="color:#9b5de5" viewBox="0 0 100 100"><use href="#present" /></svg>
+            <svg class="present present--l" style="color:#c81d4e" viewBox="0 0 100 100"><use href="#present" /></svg>
+            <svg class="ground-hamster" viewBox="0 0 120 120"><use href="#hamster" /></svg>
+            <svg class="present present--m" style="color:#2a9d8f" viewBox="0 0 100 100"><use href="#present" /></svg>
+            <svg class="present present--s" style="color:#3a86ff" viewBox="0 0 100 100"><use href="#present" /></svg>
+          </div>
+        </div>
+      </div>
+
+      <p id="empty-state" class="empty-state" hidden>
+        لا توجد رسائل بعد. أضِف رسائلك في الملف <code>data/messages.js</code> 💛
+      </p>
+
+      <div class="side-controls">
+        <button id="release-all" class="side-btn" type="button">🎈 أطلقي كل البالونات</button>
+        <button id="rewind" class="side-btn" type="button">⏪ من البداية</button>
+      </div>
+
+      <footer class="footer"><p>صُنع بكل حب <span aria-hidden="true">💛🐹</span></p></footer>
+
+      <div id="finale-card" class="finale-card" hidden>
+        <div class="finale-inner">
+          <svg class="dialog-hamster" viewBox="0 0 120 120" aria-hidden="true"><use href="#hamster" /></svg>
+          <h2 id="finale-title" class="finale-title"></h2>
+          <p id="finale-message" class="finale-message"></p>
+          <button id="finale-replay" class="cta-btn" type="button">🔁 شاهدي من جديد</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Optional background music (does nothing until assets/audio/birthday.mp3 exists) -->
+  <button id="music-toggle" class="music-toggle" type="button" aria-pressed="false"
+          aria-label="تشغيل أو إيقاف الموسيقى" title="تشغيل / إيقاف الموسيقى">
+    <span class="music-icon" aria-hidden="true">🎵</span>
+  </button>
+  <audio id="bg-music" loop preload="none">
+    <source src="assets/audio/birthday.mp3" type="audio/mpeg" />
+  </audio>
+
+  <!-- Message popup: shows text, OR an audio player for the golden voice balloon -->
+  <dialog id="message-dialog" class="message-dialog" aria-labelledby="dlg-name" aria-describedby="dlg-message">
+    <div class="dialog-card">
+      <svg class="dialog-hamster" viewBox="0 0 120 120" aria-hidden="true">
+        <use href="#hamster" />
+      </svg>
+      <p class="dialog-from">رسالة من</p>
+      <h2 id="dlg-name" class="dialog-name"></h2>
+      <p id="dlg-message" class="dialog-message"></p>
+      <div id="dlg-audio" class="dialog-audio"><!-- voice player injected here when needed --></div>
+      <button id="dialog-close" class="dialog-close" type="button" autofocus>إغلاق</button>
+    </div>
+  </dialog>
+
+  <!-- Order matters: data + confetti load before the app that uses them. Plain scripts keep file:// working. -->
+  <script src="confetti.js"></script>
+  <script src="data/quiz.js"></script>
+  <script src="data/memes.js"></script>
+  <script src="data/messages.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

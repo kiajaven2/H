@@ -1,0 +1,666 @@
+/* ============================================================================
+   عيد ميلاد حوراء — Hawraa's Birthday
+   Theme: BLACK + GOLD (elegant party). Arabic-first (RTL), 3 stages.
+   Uses CSS logical properties for chrome; animates transform/opacity only.
+   ============================================================================ */
+
+:root {
+  --font-head: "Baloo Bhaijaan 2", "Tajawal", system-ui, sans-serif;
+  --font-body: "Tajawal", "Cairo", system-ui, sans-serif;
+
+  /* Black + gold elegant palette */
+  --bg-0: #0c0b10;          /* near-black base */
+  --panel: #16131f;         /* slightly lifted panel */
+  --card: #1b1726;          /* dialog / tiles */
+  --gold: #f6c453;
+  --gold-soft: #ffe39a;
+  --gold-deep: #c9962f;
+  --rose: #ff7eb3;          /* warm party accent */
+  --ink: #efe8db;           /* light text on dark */
+  --ink-soft: #b8ad9a;
+  --line: rgba(246, 196, 83, 0.28);
+
+  --shadow-soft: 0 12px 30px rgba(0, 0, 0, 0.5);
+  --shadow-pop: 0 22px 55px rgba(0, 0, 0, 0.6);
+  --glow-gold: 0 0 32px -4px rgba(246, 196, 83, 0.85);
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; } /* beats class-level display:grid/flex */
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: var(--font-body);
+  font-size: clamp(16px, 1rem + 0.4vw, 19px);
+  line-height: 1.7;
+  color: var(--ink);
+  background:
+    radial-gradient(120% 90% at 50% -10%, rgba(246, 196, 83, 0.16), transparent 55%),
+    radial-gradient(110% 80% at 85% 115%, rgba(255, 126, 179, 0.10), transparent 60%),
+    var(--bg-0);
+  background-attachment: fixed;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ----------------------------- Background layers ------------------------ */
+.starfield {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.sparkle {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--gold-soft);
+  box-shadow: 0 0 6px 1px rgba(255, 227, 154, 0.8);
+  opacity: 0.15;
+  animation: twinkle var(--tw, 3.5s) ease-in-out infinite;
+  animation-delay: var(--td, 0s);
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.1; transform: scale(0.7); }
+  50%      { opacity: 0.95; transform: scale(1.15); }
+}
+
+#confetti-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 60;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ----------------------------- Progress dots ---------------------------- */
+.progress {
+  position: fixed;
+  inset-block-start: 1rem;
+  inset-inline: 0;
+  z-index: 50;
+  display: flex;
+  gap: 0.7rem;
+  justify-content: center;
+}
+.progress-dot {
+  inline-size: 12px;
+  block-size: 12px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: transparent;
+  cursor: default;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.progress-dot.is-done { background: var(--gold-deep); border-color: var(--gold-deep); cursor: pointer; }
+.progress-dot.is-active {
+  background: var(--gold);
+  border-color: var(--gold);
+  box-shadow: var(--glow-gold);
+  transform: scale(1.25);
+}
+
+/* ----------------------------- Stages ----------------------------------- */
+.stages { position: relative; z-index: 1; }
+.stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 100svh;
+  padding: clamp(4rem, 9vw, 5.5rem) 1rem 3rem;
+  text-align: center;
+}
+.stage[hidden] { display: none; }
+.stage.is-active { animation: stage-in 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+@keyframes stage-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+#stage-balloons { justify-content: flex-start; }
+
+.stage-inner { inline-size: min(720px, 100%); }
+.stage-hamster {
+  inline-size: clamp(78px, 16vw, 112px);
+  height: auto;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.5));
+  animation: hamster-bob 3.4s ease-in-out infinite;
+}
+.stage-title {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: clamp(1.7rem, 5vw, 3rem);
+  line-height: 1.3;
+  margin: 0.5em 0 0.2em;
+  background: linear-gradient(180deg, var(--gold-soft), var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 18px rgba(246, 196, 83, 0.25);
+}
+.stage-sub { color: var(--ink-soft); margin: 0 0 1.6rem; }
+
+/* ----------------------------- Quiz (stage 1) --------------------------- */
+.quiz { margin-block-start: 1rem; }
+.quiz-question {
+  font-size: clamp(1.15rem, 3.4vw, 1.5rem);
+  font-weight: 700;
+  margin: 0 auto 1.6rem;
+  max-inline-size: 32ch;
+  color: var(--ink);
+}
+.quiz-options {
+  display: grid;
+  gap: 0.9rem;
+  max-inline-size: 30rem;
+  margin-inline: auto;
+}
+.quiz-option {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gold-soft);
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  padding: 0.85em 1.2em;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+.quiz-option:hover { transform: translateY(-2px); border-color: var(--gold); }
+.quiz-option:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.quiz-option.is-correct {
+  background: linear-gradient(135deg, var(--gold-soft), var(--gold));
+  color: #2a2008; border-color: var(--gold); box-shadow: var(--glow-gold);
+}
+.quiz-option.is-wrong { animation: shake 0.4s ease; border-color: var(--rose); color: var(--rose); }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-7px); }
+  40%, 80% { transform: translateX(7px); }
+}
+/* the reply shows as a noticeable gold "answer" bubble that pops in */
+.quiz-feedback {
+  min-block-size: 1.6em;
+  margin-block-start: 1.5rem;
+}
+.quiz-feedback:not(:empty) {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: clamp(1.1rem, 3.2vw, 1.4rem);
+  line-height: 1.5;
+  color: #2a2008;
+  background: linear-gradient(135deg, var(--gold-soft), var(--gold));
+  border-radius: 18px;
+  border-end-end-radius: 5px; /* little chat-bubble tail on the start side (RTL) */
+  padding: 0.7em 1.25em;
+  max-inline-size: min(90%, 34ch);
+  box-shadow: var(--glow-gold), 0 10px 24px rgba(0, 0, 0, 0.5);
+  animation: reply-pop 0.45s cubic-bezier(0.22, 0.61, 0.36, 1.5) both;
+}
+@keyframes reply-pop {
+  from { opacity: 0; transform: scale(0.7) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ----------------------------- Memes (stage 2) -------------------------- */
+.memes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: 1rem;
+  margin: 0.5rem 0 2rem;
+}
+.meme {
+  margin: 0;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+}
+.meme img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: var(--panel);
+}
+.meme figcaption {
+  padding: 0.7em 0.9em;
+  font-size: 0.98rem;
+  color: var(--ink-soft);
+}
+
+/* ----------------------------- Buttons ---------------------------------- */
+.cta-btn {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: clamp(1.05rem, 2.6vw, 1.25rem);
+  color: #2a2008;
+  background: linear-gradient(135deg, var(--gold-soft), var(--gold));
+  border: 0;
+  border-radius: 999px;
+  padding: 0.7em 2.4em;
+  cursor: pointer;
+  box-shadow: var(--glow-gold), 0 10px 22px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.cta-btn:hover { transform: translateY(-2px); }
+.cta-btn:focus-visible { outline: 3px solid var(--gold-soft); outline-offset: 3px; }
+
+/* ----------------------------- Hero (stage 3) --------------------------- */
+.hero { text-align: center; padding-inline: 1rem; }
+.hero-hamster {
+  inline-size: clamp(82px, 18vw, 124px);
+  height: auto;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.55));
+  animation: hamster-bob 3.4s ease-in-out infinite;
+}
+.hero-title {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: clamp(2rem, 6vw, 3.8rem);
+  line-height: 1.25;
+  margin: 0.35em 0 0.12em;
+  background: linear-gradient(180deg, var(--gold-soft), var(--gold) 70%, var(--gold-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 3px 24px rgba(246, 196, 83, 0.3);
+}
+.hero-sub { color: var(--ink-soft); margin: 0.2em auto 0; max-inline-size: 40ch; }
+
+/* ----------------------------- Sky / balloons --------------------------- */
+/* ----------------------------- Scene (stage 3) -------------------------- */
+.finale-top { text-align: center; }
+.finale-prompt {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: clamp(1.4rem, 4.6vw, 2.4rem);
+  line-height: 1.25;
+  margin: 0.2em 0;
+  background: linear-gradient(180deg, var(--gold-soft), var(--gold));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 2px 18px rgba(246, 196, 83, 0.22);
+}
+.progress-count { color: var(--ink-soft); font-weight: 700; margin: 0.1em 0 0; min-block-size: 1.4em; }
+
+.scene {
+  position: relative;
+  inline-size: min(1100px, 96%);
+  margin-inline: auto;
+  margin-block: clamp(0.5rem, 2vw, 1.4rem);
+  block-size: clamp(420px, 64vh, 660px);
+  overflow: hidden;
+}
+.balloon-air { position: absolute; inset: 0; }
+
+.ground {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: clamp(96px, 17vh, 156px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 2;
+}
+.presents {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(0.3rem, 1.6vw, 1rem);
+  padding-inline: 1rem;
+}
+.present { width: auto; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.5)); }
+.present--s { block-size: 56px; }
+.present--m { block-size: 74px; }
+.present--l { block-size: 94px; }
+.ground-hamster { inline-size: 86px; height: auto; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5)); }
+
+.ground-balloon {
+  position: absolute;
+  inset-block-end: 38%;
+  left: var(--gx, 50%);
+  inline-size: 34px;
+  block-size: 44px;
+  border-radius: 50% 50% 50% 50% / 45% 45% 55% 55%;
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 45%),
+    hsl(var(--hue, 330) 78% 62%);
+  box-shadow: 0 0 16px -3px hsl(var(--hue, 330) 85% 60% / 0.7);
+  transform-origin: bottom center;
+  animation: sway 4.2s ease-in-out infinite;
+  z-index: 1;
+}
+.ground-balloon::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 100%;
+  left: 50%;
+  inline-size: 1.5px;
+  block-size: 46px;
+  background: linear-gradient(hsl(var(--hue, 330) 50% 60%), rgba(255, 255, 255, 0));
+}
+@keyframes sway { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+
+.balloon {
+  appearance: none;
+  border: 0; padding: 0; font: inherit; cursor: pointer; color: #fff;
+  position: absolute;
+  /* PHYSICAL left/top set by app.js — a random scatter should not flip with RTL */
+  left: var(--x, 50%);
+  top: var(--y, 0px);
+  transform: translateX(-50%);
+
+  inline-size: clamp(86px, 15vw, 122px);
+  aspect-ratio: 5 / 6;
+  display: grid;
+  place-items: center;
+  text-align: center;
+
+  border-radius: 49% 49% 49% 49% / 44% 44% 56% 56%;
+  background:
+    radial-gradient(circle at 33% 26%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 44%),
+    radial-gradient(circle at 72% 84%, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0) 55%),
+    hsl(var(--hue, 330) 82% 66%);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5), 0 0 32px -2px hsl(var(--hue, 330) 92% 66% / 0.9);
+
+  animation: float 4.5s ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+  will-change: transform;
+  transition: filter 0.18s ease;
+}
+.balloon:hover { filter: brightness(1.08) saturate(1.08); }
+.balloon:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-pop), 0 0 0 4px var(--bg-0), 0 0 0 7px var(--gold);
+}
+
+.balloon::before { /* knot */
+  content: "";
+  position: absolute;
+  inset-block-end: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-inline: 7px solid transparent;
+  border-block-start: 9px solid hsl(var(--hue, 330) 65% 52%);
+}
+.balloon::after { /* string */
+  content: "";
+  position: absolute;
+  inset-block-start: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  inline-size: 2px;
+  block-size: clamp(28px, 6vw, 52px);
+  background: linear-gradient(hsl(var(--hue, 330) 45% 55%), rgba(255, 255, 255, 0));
+  border-radius: 2px;
+}
+
+.balloon-name {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: clamp(0.85rem, 2.6vw, 1.05rem);
+  line-height: 1.15;
+  padding-inline: 0.5em;
+  max-inline-size: 100%;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+/* entrance + pop */
+.balloon--enter {
+  animation:
+    rise 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) backwards,
+    float 4.5s ease-in-out infinite 0.9s;
+  animation-delay: var(--delay, 0s), calc(var(--delay, 0s) + 0.9s);
+}
+.balloon--pop { animation: pop 0.42s cubic-bezier(0.5, -0.4, 0.4, 1.4) forwards; pointer-events: none; }
+
+/* the single, centered balloon in sequential mode — rises from behind the presents */
+.balloon--active {
+  left: 50%;
+  top: 42%;
+  inline-size: clamp(120px, 26vw, 178px);
+  animation:
+    rise-from-ground 0.95s cubic-bezier(0.22, 0.61, 0.36, 1) backwards,
+    float 4.5s ease-in-out infinite 0.95s;
+}
+@keyframes rise-from-ground {
+  from { transform: translateX(-50%) translateY(62vh); opacity: 0; }
+  to   { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateX(-50%) translateY(0) rotate(-1.5deg); }
+  50%      { transform: translateX(-50%) translateY(-14px) rotate(1.5deg); }
+}
+@keyframes rise {
+  from { transform: translateX(-50%) translateY(60vh); opacity: 0; }
+  to   { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+@keyframes pop {
+  0%   { transform: translateX(-50%) scale(1); opacity: 1; }
+  35%  { transform: translateX(-50%) scale(1.18); opacity: 1; }
+  100% { transform: translateX(-50%) scale(0); opacity: 0; }
+}
+@keyframes hamster-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50%      { transform: translateY(-8px) rotate(2deg); }
+}
+
+.empty-state { text-align: center; color: var(--ink-soft); padding: 2rem 1rem; }
+.empty-state code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.1em 0.4em; border-radius: 6px;
+  direction: ltr; unicode-bidi: isolate; color: var(--gold-soft);
+}
+
+.footer { text-align: center; color: var(--ink-soft); padding-block: 1.5rem 2.5rem; font-size: 0.95rem; }
+
+/* ----------------------------- Music toggle ----------------------------- */
+.music-toggle {
+  position: fixed;
+  inset-block-end: 1rem;
+  inset-inline-end: 1rem;
+  z-index: 70;
+  inline-size: 52px; block-size: 52px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--panel);
+  box-shadow: var(--shadow-soft);
+  font-size: 1.4rem; cursor: pointer;
+  display: grid; place-items: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.music-toggle:hover { transform: scale(1.07); }
+.music-toggle:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.music-toggle[aria-pressed="true"] { background: #2a2233; box-shadow: var(--glow-gold); }
+.music-toggle[aria-pressed="true"] .music-icon { animation: spin 4s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ----------------------------- Side controls (stage 3) ------------------ */
+.side-controls {
+  position: fixed;
+  inset-block-end: 1rem;
+  inset-inline-start: 1rem;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.side-btn {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--gold-soft);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.5em 1em;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  transition: transform 0.15s ease;
+}
+.side-btn:hover { transform: translateY(-1px); }
+.side-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+/* ----------------------------- Finale card (stage 3) -------------------- */
+.finale-card {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(6, 5, 9, 0.62);
+  backdrop-filter: blur(4px);
+  animation: dialog-in 0.3s ease;
+}
+.finale-inner {
+  position: relative;
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(246, 196, 83, 0.14), transparent 60%),
+    var(--card);
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  padding: clamp(1.8rem, 5vw, 2.6rem) clamp(1.2rem, 5vw, 2rem) clamp(1.2rem, 4vw, 1.8rem);
+  box-shadow: var(--shadow-pop);
+  text-align: center;
+  max-inline-size: min(92vw, 470px);
+  max-block-size: 86dvh;
+  overflow: auto;
+  margin-block-start: 44px;
+}
+.finale-title {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: clamp(1.6rem, 5vw, 2.3rem);
+  margin: 0.1em 0 0.5em;
+  background: linear-gradient(180deg, var(--gold-soft), var(--gold));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.finale-message {
+  font-size: clamp(1.05rem, 3vw, 1.25rem);
+  line-height: 1.85;
+  white-space: pre-line;
+  text-align: start;
+  color: var(--ink);
+  margin: 0 0 1.4rem;
+}
+
+/* ----------------------------- Dialog / message ------------------------- */
+.message-dialog {
+  border: 0; padding: 0; background: transparent;
+  max-inline-size: min(92vw, 470px);
+  color: var(--ink);
+  overflow: visible;
+}
+.message-dialog::backdrop {
+  background: rgba(6, 5, 9, 0.72);
+  backdrop-filter: blur(4px);
+}
+.dialog-card {
+  position: relative;
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(246, 196, 83, 0.14), transparent 60%),
+    var(--card);
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  padding: clamp(1.6rem, 5vw, 2.4rem) clamp(1.2rem, 5vw, 2rem) clamp(1.2rem, 4vw, 1.8rem);
+  box-shadow: var(--shadow-pop);
+  text-align: center;
+  margin-block-start: 44px;
+}
+.dialog-hamster {
+  position: absolute;
+  inset-block-start: -52px;
+  left: 50%;
+  transform: translateX(-50%);
+  inline-size: 88px; height: auto;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5));
+}
+.dialog-from { margin: 0; color: var(--ink-soft); font-size: 0.95rem; }
+.dialog-name {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: clamp(1.5rem, 5vw, 2.1rem);
+  margin: 0.1em 0 0.5em;
+  background: linear-gradient(180deg, var(--gold-soft), var(--gold));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.dialog-message {
+  font-size: clamp(1.05rem, 3vw, 1.25rem);
+  line-height: 1.85;
+  margin: 0 0 1.4rem;
+  text-align: start;
+  max-block-size: 50dvh;
+  overflow: auto;
+  white-space: pre-line;
+  color: var(--ink);
+}
+.dialog-audio { margin: 0 0 1.4rem; }
+.dialog-audio:empty { display: none; }
+.dialog-audio audio { inline-size: 100%; }
+.dialog-audio .audio-missing {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  padding: 0.8em;
+}
+.dialog-close {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #2a2008;
+  background: linear-gradient(135deg, var(--gold-soft), var(--gold));
+  border: 0; border-radius: 999px;
+  padding: 0.6em 2.2em; cursor: pointer;
+  box-shadow: var(--glow-gold);
+  transition: transform 0.15s ease;
+}
+.dialog-close:hover { transform: translateY(-2px); }
+.dialog-close:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+.message-dialog[open] { animation: dialog-in 0.28s cubic-bezier(0.22, 0.61, 0.36, 1); }
+@keyframes dialog-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ----------------------------- Reduced motion --------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .balloon, .balloon--enter, .balloon--pop, .balloon--active,
+  .hero-hamster, .stage-hamster, .sparkle, .ground-balloon,
+  .quiz-feedback:not(:empty),
+  .music-toggle[aria-pressed="true"] .music-icon,
+  .message-dialog[open], .finale-card, .stage.is-active {
+    animation: none !important;
+  }
+  .balloon { transform: translateX(-50%); }
+  .cta-btn, .dialog-close, .music-toggle, .quiz-option { transition: none; }
+}
