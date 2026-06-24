@@ -516,7 +516,7 @@
   /* ===== Background music — soft instrumental via the YouTube IFrame API ===== */
   var YT_ID = "TorMYUdoV5k";
   var MUSIC_KEY = "hawraa-music";
-  var MUSIC_VOL = 14; // 0-100, kept low for a soft background
+  var MUSIC_VOL = 65; // 0-100 background music volume
   var ytPlayer = null, ytReady = false, ytWantPlay = false;
   var musicBtn = document.getElementById("music-toggle");
 
