@@ -134,6 +134,18 @@ window.MESSAGES = [
     color: "lavender",
   },
   {
+    name: "اريام",
+    message: "حوررريييي\nMyy hamsster, happy new year my life, I wish you a million years hopefully, I hope this year will be beautiful and achieve your dreams, ambitions and everything you wish for, and I hope you are always happy, you deserve all the best in this world because you are a very nice person and your heart is white 🤍🤍.\nEnjoy your dayy🌷",
+    lang: "en",
+    color: "sky",
+  },
+  {
+    name: "ايوش",
+    message: "حوري ياحوري\nكل عام ونتي بخير حبيبتي الله يطول بعمرك الله يخليك لي فعلا ياحظي فيك وياحظي بصداقتك ، صح انتي طايشة وهبلة ومريضة لكن محبوبة وحلوة وفرفوشة ، كمان أحيانا احب اخنقك من ورا هرموناتك يلي لحد الان مقدرت افسرها ، انتي عندك اضطراب جديد لسه مش معروف 🥲\nالمهم هديتك بتوصلك بالخاص ، و في الاخير ياربببببب\n واشوفك عروستي  😻🤚🏻\nبما انو انا وانتي كارهين الرجال خلي نتزوج  ، ونخلي الفرحة فرحتين فرحة ميلادك وفرحة زواجنا 😻💗\n\nنحببك بزاااففففف 🦢",
+    lang: "ar",
+    color: "pink",
+  },
+  {
     name: "يارا",
     image: "assets/images/yara.jpg",
     lang: "ar",
