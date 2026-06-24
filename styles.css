@@ -619,7 +619,18 @@ body {
   max-block-size: 50dvh;
   overflow: auto;
   white-space: pre-line;
+  overflow-wrap: anywhere; /* wrap very long unbroken runs (e.g. ههههه) */
   color: var(--ink);
+}
+.dialog-image { margin: 0 0 1.2rem; }
+.dialog-image:empty { display: none; }
+.dialog-image img {
+  display: block;
+  inline-size: 100%;
+  max-block-size: 54vh;
+  object-fit: contain;
+  border-radius: 16px;
+  border: 1px solid var(--line);
 }
 .dialog-audio { margin: 0 0 1.4rem; }
 .dialog-audio:empty { display: none; }

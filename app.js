@@ -18,6 +18,7 @@
   var nameEl = document.getElementById("dlg-name");
   var messageEl = document.getElementById("dlg-message");
   var audioSlot = document.getElementById("dlg-audio");
+  var imageSlot = document.getElementById("dlg-image");
   var closeBtn = document.getElementById("dialog-close");
   var bgMusic = document.getElementById("bg-music");
 
@@ -246,13 +247,14 @@
   function prepareMessages() {
     var data = Array.isArray(window.MESSAGES) ? window.MESSAGES : [];
     allMessages = data.filter(function (m) {
-      return m && m.approved !== false && (m.name || m.message || m.voice);
+      return m && m.approved !== false && (m.name || m.message || m.voice || m.image);
     }).map(function (m, i) {
       return {
         name: clampStr(m.name || "صديق", MAX_NAME),
         message: clampStr(m.message || "", MAX_MSG),
         lang: m.lang === "en" ? "en" : "ar",
         voice: m.voice || null,
+        image: m.image || null,
         hue: (COLOR_HUES[m.color] != null) ? COLOR_HUES[m.color] : PALETTE[i % PALETTE.length]
       };
     });
@@ -269,6 +271,7 @@
     btn.dataset.message = msg.message;
     btn.dataset.lang = msg.lang;
     if (msg.voice) btn.dataset.voice = msg.voice;
+    if (msg.image) btn.dataset.image = msg.image;
 
     var label = document.createElement("span");
     label.className = "balloon-name";
@@ -422,6 +425,21 @@
     messageEl.dir = lang === "en" ? "ltr" : "rtl";
 
     audioSlot.replaceChildren();
+    imageSlot.replaceChildren();
+
+    if (btn.dataset.image) {
+      var img = document.createElement("img");
+      img.src = btn.dataset.image;
+      img.alt = "صورة من " + btn.dataset.name;
+      img.addEventListener("error", function () {
+        imageSlot.replaceChildren();
+        var n = document.createElement("p");
+        n.className = "audio-missing";
+        n.textContent = "تعذّر تحميل الصورة 📷";
+        imageSlot.appendChild(n);
+      });
+      imageSlot.appendChild(img);
+    }
 
     if (btn.dataset.voice) {
       var audio = document.createElement("audio");
@@ -432,7 +450,7 @@
         audioSlot.replaceChildren();
         var note = document.createElement("p");
         note.className = "audio-missing";
-        note.textContent = "ضع ملف الرسالة الصوتية في " + btn.dataset.voice + " ليعمل ▶";
+        note.textContent = "تعذّر تشغيل الرسالة الصوتية في هذا المتصفح 🎙️";
         audioSlot.appendChild(note);
       });
       audioSlot.appendChild(audio);
