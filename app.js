@@ -574,6 +574,83 @@
     document.addEventListener("keydown", maybeStart, true);
   })();
 
+  /* ===== Secret password-gated final message (opened from the finale card) ===== */
+  (function setupSecret() {
+    var overlay = document.getElementById("secret-overlay");
+    var openBtn = document.getElementById("open-secret");
+    if (!overlay || !openBtn) return;
+    var closeX = document.getElementById("secret-close");
+    var doneBtn = document.getElementById("secret-done");
+    var form = document.getElementById("secret-form");
+    var input = document.getElementById("secret-input");
+    var errEl = document.getElementById("secret-error");
+    var lockedView = document.getElementById("secret-locked");
+    var unlockedView = document.getElementById("secret-unlocked");
+    var msgEl = document.getElementById("secret-message");
+    var sAudio = document.getElementById("secret-audio");
+    var S = window.SECRET || {};
+
+    function hsh(s) { var h = 5381; for (var i = 0; i < s.length; i++) { h = (Math.imul(h, 33) ^ s.charCodeAt(i)) >>> 0; } return h; }
+    function decodeB64Utf8(b64) {
+      try {
+        var bin = atob(b64), n = bin.length, bytes = new Uint8Array(n);
+        for (var i = 0; i < n; i++) bytes[i] = bin.charCodeAt(i);
+        return new TextDecoder().decode(bytes);
+      } catch (e) { return ""; }
+    }
+
+    function open() {
+      unlockedView.hidden = true;
+      lockedView.hidden = false;
+      errEl.textContent = "";
+      input.value = "";
+      sAudio.replaceChildren();
+      overlay.hidden = false;
+      setTimeout(function () { try { input.focus({ preventScroll: true }); } catch (e) {} }, 60);
+    }
+    function close() {
+      var a = sAudio.querySelector("audio");
+      if (a) { try { a.pause(); } catch (e) {} }
+      sAudio.replaceChildren();
+      overlay.hidden = true;
+      musicResumeAfterVoice();
+      try { openBtn.focus({ preventScroll: true }); } catch (e) {}
+    }
+    function unlock() {
+      lockedView.hidden = true;
+      unlockedView.hidden = false;
+      msgEl.textContent = decodeB64Utf8(S.m || "");
+      sAudio.replaceChildren();
+      var audio = document.createElement("audio");
+      audio.controls = true;
+      audio.preload = "auto";
+      audio.src = "data:" + (S.t || "audio/mp4") + ";base64," + (S.a || "");
+      sAudio.appendChild(audio);
+      musicPauseForVoice();
+      var p = audio.play();
+      if (p && typeof p.catch === "function") p.catch(function () {});
+      if (!reduceMotion.matches && typeof window.popConfetti === "function") {
+        window.popConfetti(window.innerWidth / 2, window.innerHeight * 0.4);
+      }
+      try { doneBtn.focus({ preventScroll: true }); } catch (e) {}
+    }
+    function tryUnlock() {
+      var val = (input.value || "").trim();
+      if (S.h != null && hsh(val) === S.h) { unlock(); }
+      else {
+        errEl.textContent = "كلمة السر غير صحيحة 🙈";
+        input.classList.remove("is-wrong"); void input.offsetWidth; input.classList.add("is-wrong");
+        try { input.focus({ preventScroll: true }); } catch (e) {}
+      }
+    }
+
+    openBtn.addEventListener("click", open);
+    if (closeX) closeX.addEventListener("click", close);
+    if (doneBtn) doneBtn.addEventListener("click", close);
+    form.addEventListener("submit", function (e) { e.preventDefault(); tryUnlock(); });
+    overlay.addEventListener("click", function (e) { if (e.target === overlay) close(); });
+  })();
+
   /* ========================= Init ======================================== */
   buildSparkles();
   buildQuiz();

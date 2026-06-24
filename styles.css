@@ -567,6 +567,82 @@ body {
   color: var(--ink);
   margin: 0 0 1.4rem;
 }
+.finale-inner .cta-btn { display: inline-block; margin: 0.4rem 0.3rem 0; }
+.finale-replay { background: var(--panel); color: var(--gold-soft); box-shadow: var(--shadow-soft); }
+
+/* ----------------------------- Secret message overlay ------------------- */
+.secret-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(6, 5, 9, 0.78);
+  backdrop-filter: blur(5px);
+  animation: dialog-in 0.3s ease;
+}
+.secret-card {
+  position: relative;
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(246, 196, 83, 0.14), transparent 60%),
+    var(--card);
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  padding: clamp(1.8rem, 5vw, 2.6rem) clamp(1.2rem, 5vw, 2rem) clamp(1.2rem, 4vw, 1.8rem);
+  box-shadow: var(--shadow-pop);
+  text-align: center;
+  max-inline-size: min(92vw, 460px);
+  max-block-size: 88dvh;
+  overflow: auto;
+}
+.secret-close {
+  position: absolute;
+  inset-block-start: 0.5rem;
+  inset-inline-end: 0.6rem;
+  background: transparent;
+  border: 0;
+  color: var(--ink-soft);
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0.3em;
+  cursor: pointer;
+}
+.secret-close:focus-visible { outline: 2px solid var(--gold); border-radius: 6px; }
+.secret-lock { font-size: 2.6rem; }
+.secret-title {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: clamp(1.5rem, 5vw, 2.1rem);
+  margin: 0.2em 0 0.1em;
+  background: linear-gradient(180deg, var(--gold-soft), var(--gold));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.secret-sub { color: var(--ink-soft); margin: 0.2em 0 1.2rem; }
+.secret-form { display: flex; flex-direction: column; gap: 0.8rem; align-items: center; }
+.secret-input {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  text-align: center;
+  color: var(--ink);
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  padding: 0.6em 1em;
+  inline-size: min(100%, 16rem);
+}
+.secret-input:focus-visible { outline: none; border-color: var(--gold); }
+.secret-input.is-wrong { animation: shake 0.4s ease; border-color: var(--rose); }
+.secret-error { min-block-size: 1.4em; color: var(--rose); font-weight: 700; margin-block-start: 0.9rem; }
+.secret-message {
+  font-size: clamp(1.05rem, 3vw, 1.25rem);
+  line-height: 1.85;
+  white-space: pre-line;
+  text-align: start;
+  color: var(--ink);
+  margin: 0.6rem 0 1.2rem;
+}
+.secret-view .dialog-hamster { position: static; transform: none; inline-size: 72px; height: auto; display: block; margin: 0 auto 0.4rem; }
 
 /* ----------------------------- Dialog / message ------------------------- */
 .message-dialog {

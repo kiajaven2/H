@@ -127,7 +127,8 @@
           <svg class="dialog-hamster" viewBox="0 0 120 120" aria-hidden="true"><use href="#hamster" /></svg>
           <h2 id="finale-title" class="finale-title"></h2>
           <p id="finale-message" class="finale-message"></p>
-          <button id="finale-replay" class="cta-btn" type="button">🔁 شاهدي من جديد</button>
+          <button id="open-secret" class="cta-btn" type="button">🔒 رسالة أخيرة خاصة</button>
+          <button id="finale-replay" class="cta-btn finale-replay" type="button">🔁 شاهدي من جديد</button>
         </div>
       </div>
     </section>
@@ -155,11 +156,39 @@
     </div>
   </dialog>
 
+  <!-- Password-gated final message (opened from the finale card) -->
+  <div id="secret-overlay" class="secret-overlay" hidden>
+    <div class="secret-card">
+      <button id="secret-close" class="secret-close" type="button" aria-label="إغلاق">✕</button>
+
+      <div id="secret-locked" class="secret-view">
+        <div class="secret-lock" aria-hidden="true">🔒</div>
+        <h2 class="secret-title">رسالة أخيرة… خاصة</h2>
+        <p class="secret-sub">أدخلي كلمة السر لفتحها 💌</p>
+        <form id="secret-form" class="secret-form" autocomplete="off">
+          <input id="secret-input" class="secret-input" type="password" dir="auto"
+                 inputmode="text" autocomplete="off" aria-label="كلمة السر" placeholder="كلمة السر" />
+          <button type="submit" class="cta-btn">فتح 🔓</button>
+        </form>
+        <p id="secret-error" class="secret-error" aria-live="polite"></p>
+      </div>
+
+      <div id="secret-unlocked" class="secret-view" hidden>
+        <svg class="dialog-hamster" viewBox="0 0 120 120" aria-hidden="true"><use href="#hamster" /></svg>
+        <p class="dialog-from">رسالة من القلب 💛</p>
+        <p id="secret-message" class="secret-message" dir="auto"></p>
+        <div id="secret-audio" class="dialog-audio"></div>
+        <button id="secret-done" class="cta-btn" type="button">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Order matters: data + confetti load before the app that uses them. Plain scripts keep file:// working. -->
   <script src="confetti.js"></script>
   <script src="data/quiz.js"></script>
   <script src="data/memes.js"></script>
   <script src="data/messages.js"></script>
+  <script src="data/secret.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
