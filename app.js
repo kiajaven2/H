@@ -29,6 +29,7 @@
   var emptyState = document.getElementById("empty-state");
   var progressCount = document.getElementById("progress-count");
   var releaseBtn = document.getElementById("release-all");
+  var skipBtn = document.getElementById("skip-finale");
   var rewindBtn = document.getElementById("rewind");
   var finaleCard = document.getElementById("finale-card");
   var finaleTitleEl = document.getElementById("finale-title");
@@ -304,6 +305,7 @@
   function updateControls() {
     // "release all" only makes sense in sequential mode while balloons still wait in the queue
     if (releaseBtn) releaseBtn.hidden = (mode !== "sequential") || (queue.length === 0);
+    if (skipBtn) skipBtn.hidden = (mode === "done");
     if (rewindBtn) rewindBtn.hidden = (mode === "done");
   }
 
@@ -556,6 +558,7 @@
   dialog.addEventListener("close", handleClosed);
 
   if (releaseBtn) releaseBtn.addEventListener("click", releaseAll);
+  if (skipBtn) skipBtn.addEventListener("click", function () { clearTimeout(advanceTimer); showFinale(); });
   if (rewindBtn) rewindBtn.addEventListener("click", startSequence);
   if (finaleReplay) finaleReplay.addEventListener("click", startSequence);
 
